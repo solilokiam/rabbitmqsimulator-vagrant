@@ -8,11 +8,15 @@ class system-update {
     }
 }
 
+class { 'nodejs':
+  version => 'stable',
+}
+
 class dev-packages {
     include wget
     include nodejs
 
-    $devPackages = [ "vim", "git","build-essentials" ]
+    $devPackages = [ "vim", "git","build-essential" ]
     package { $devPackages:
         ensure => "installed",
         require => Exec['apt-get update'],
@@ -21,15 +25,25 @@ class dev-packages {
 
 class rabbitsimulator {
     require dev-packages
+    require nodejs
+    
     exec { 'git clone https://github.com/RabbitMQSimulator/RabbitMQSimulator.git':
-	command => 'git clone https://github.com/RabbitMQSimulator/RabbitMQSimulator.git /var/simulator'
+    	command => 'git clone https://github.com/RabbitMQSimulator/RabbitMQSimulator.git /var/simulator'
     }
 
     exec { 'npm install':
-	command => 'npm install',
-	cwd => '/var/simulator'
+    	command => 'npm install',
+    	cwd => '/var/simulator'
+    }
+
+    exec { 'node app.js':
+        command => 'node app.js',
+        cwd => '/var/simulator',
+
     }
 }
+
+
 
 include system-update
 include dev-packages
